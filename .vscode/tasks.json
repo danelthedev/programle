@@ -1,0 +1,19 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "dev",
+      "type": "shell",
+      "command": "distrobox enter webdev -- bash -lc 'cd \"${workspaceFolder}\" && air'",
+      "group": { "kind": "build", "isDefault": true },
+      "presentation": { "reveal": "always", "panel": "shared" },
+      "problemMatcher": "$go"
+    },
+    {
+      "label": "run (no-reload)",
+      "type": "shell",
+      "command": "distrobox enter webdev -- bash -c 'cd \"${workspaceFolder}\" && go run .'",
+      "presentation": { "reveal": "always" }
+    }
+  ]
+}
