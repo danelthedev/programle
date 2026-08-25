@@ -327,7 +327,7 @@ function startReleaseDuel(){
     if((target.tiobe_rank!=null || target.github_rank!=null) && popularityBtn){ popularityBtn.classList.remove('hidden'); } else { restartBtn.classList.remove('hidden'); }
     return;
   }
-  let cands=LANGS.filter(l=> l.release_year!=null && l.name!==target.name);
+  let cands=LANGS.filter(l=> l.release_year!=null && l.name!==target.name && l.release_year!==target.release_year);
   shuffle(cands);
   releaseOpponents=cands.slice(0,5);
   if(releaseOpponents.length<5){ // fallback if not enough
@@ -346,6 +346,17 @@ function startReleaseDuel(){
 }
 function renderReleaseFight(){
   if(releaseIdx>=releaseOpponents.length){
+    // ponytail: place current language at end so timeline shows target; hide year until all placed
+    if(target && !releaseDotPositions.find(p=> p.names.some(n=> n.name===target.name))){
+      placeReleaseDot(target, true);
+      // reveal target year only after all dots placed (avoid hint during duels)
+      const tDot = releaseDotPositions.find(p=> p.names.some(n=> n.name===target.name));
+      if(tDot){
+        const yrEl = tDot.el.querySelector('.target-year');
+        if(yrEl) yrEl.textContent = yrEl.dataset.year;
+      }
+    }
+
     document.getElementById('releaseFight')?.classList.add('hidden');
     document.getElementById('releaseDone')?.classList.remove('hidden');
     return;
@@ -373,7 +384,7 @@ function handleReleaseChoice(chosenName){
     btn.disabled=true;
   });
   if(releaseResult){
-    releaseResult.textContent= isCorrect? 'Correct! '+correctOlder+' ('+Math.min(targetYear,oppYear)+') is older' : 'Wrong! '+correctOlder+' ('+Math.min(targetYear,oppYear)+') is older';
+    releaseResult.textContent= isCorrect? 'Correct! '+correctOlder+' is older' : 'Wrong! '+correctOlder+' is older';
     releaseResult.className='font-mono text-sm text-center '+(isCorrect?'text-success':'text-error');
     releaseResult.classList.remove('hidden');
   }
@@ -383,13 +394,15 @@ function handleReleaseChoice(chosenName){
 function placeReleaseDot(lang, isCorrect){
   if(!releaseTimeline) return;
   const year=lang.release_year;
+  const isTarget = target && lang.name === target.name;
+  const textColor = isTarget ? 'text-primary' : (isCorrect?'text-success':'text-error');
   let existing = releaseDotPositions.find(p=> p.year===year);
   if(existing){
     existing.names.push({name: lang.name, isCorrect});
     const nameContainer=existing.el.querySelector('.dot-names');
     if(nameContainer){
       const n=document.createElement('div');
-      n.className='font-mono text-[10px] leading-none whitespace-nowrap bg-base-200 px-1 rounded '+(isCorrect?'text-success':'text-error');
+      n.className='font-mono text-[10px] leading-none whitespace-nowrap bg-base-200 px-1 rounded '+textColor;
       n.textContent=lang.name;
       nameContainer.appendChild(n);
     }
@@ -411,10 +424,10 @@ function placeReleaseDot(lang, isCorrect){
   dot.style.left=pct+'%';
   dot.style.top='50%';
   dot.style.transform='translate(-50%, -50%)';
-  const color=isCorrect?'bg-success':'bg-error';
+  const color=isTarget?'bg-primary':(isCorrect?'bg-success':'bg-error');
   const nameOff = -14 - Math.abs(lvl)*16;
   const yearOff = 10 + Math.abs(lvl)*16;
-  dot.innerHTML=`<div class="dot-names flex flex-col items-center gap-0.5" style="transform: translateY(${nameOff}px)"><div class="font-mono text-[10px] leading-none whitespace-nowrap bg-base-200 px-1 rounded ${isCorrect?'text-success':'text-error'}">${lang.name}</div></div><div class="w-px h-3 bg-white"></div><div class="w-3 h-3 rounded-full ${color} border-2 border-base-100"></div><div class="w-px h-3 bg-white"></div><div class="font-mono text-[10px] leading-none whitespace-nowrap bg-base-200 px-1 rounded border border-base-300" style="transform: translateY(${yearOff}px)">${year}</div>`;
+  dot.innerHTML=`<div class="dot-names flex flex-col items-center gap-0.5" style="transform: translateY(${nameOff}px)"><div class="font-mono text-[10px] leading-none whitespace-nowrap bg-base-200 px-1 rounded ${textColor}">${lang.name}</div></div><div class="w-px h-3 bg-white"></div><div class="w-3 h-3 rounded-full ${color} border-2 border-base-100"></div><div class="w-px h-3 bg-white"></div><div class="font-mono text-[10px] leading-none whitespace-nowrap bg-base-200 px-1 rounded border border-base-300 target-year" data-year="${year}" style="transform: translateY(${yearOff}px)">${isTarget?'???':year}</div>`;
   releaseDotPositions.push({year, pct, lvl, el: dot, names:[{name: lang.name, isCorrect}]});
   releaseTimeline.appendChild(dot);
   updateReleaseTimelineZoom();

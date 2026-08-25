@@ -22,6 +22,89 @@ type Lang struct {
 	ReleaseYear *int     `json:"release_year,omitempty"`
 }
 
+// ponytail: tolerate "None" strings from gather generate (data.json) -> treat as null
+func (l *Lang) UnmarshalJSON(data []byte) error {
+	type rawLang map[string]json.RawMessage
+	var m rawLang
+	if err := json.Unmarshal(data, &m); err != nil {
+		return err
+	}
+	if v, ok := m["name"]; ok {
+		json.Unmarshal(v, &l.Name)
+	}
+	if v, ok := m["snippets"]; ok {
+		json.Unmarshal(v, &l.Snippets)
+	}
+	l.TiobeRank = parseIntField(m["tiobe_rank"])
+	l.TiobeRating = parseFloatField(m["tiobe_rating"])
+	l.GithubRank = parseIntField(m["github_rank"])
+	if l.GithubRank == nil {
+		l.GithubRank = parseIntField(m["github_rank_alt"])
+	}
+	l.GithubShare = parseFloatField(m["github_share"])
+	if l.GithubShare == nil {
+		l.GithubShare = parseFloatField(m["github_market_share"])
+	}
+	l.ReleaseYear = parseIntField(m["release_year"])
+	return nil
+}
+
+func parseIntField(raw json.RawMessage) *int {
+	if len(raw) == 0 || string(raw) == "null" || string(raw) == `"None"` {
+		return nil
+	}
+	var i int
+	if err := json.Unmarshal(raw, &i); err == nil {
+		return &i
+	}
+	var s string
+	if err := json.Unmarshal(raw, &s); err == nil {
+		s = strings.TrimSpace(s)
+		if s == "" || s == "None" {
+			return nil
+		}
+		if v, err := strconv.Atoi(s); err == nil {
+			return &v
+		}
+		if f, err := strconv.ParseFloat(s, 64); err == nil {
+			v := int(f)
+			return &v
+		}
+	}
+	var f float64
+	if err := json.Unmarshal(raw, &f); err == nil {
+		v := int(f)
+		return &v
+	}
+	return nil
+}
+
+func parseFloatField(raw json.RawMessage) *float64 {
+	if len(raw) == 0 || string(raw) == "null" || string(raw) == `"None"` {
+		return nil
+	}
+	var f float64
+	if err := json.Unmarshal(raw, &f); err == nil {
+		return &f
+	}
+	var s string
+	if err := json.Unmarshal(raw, &s); err == nil {
+		s = strings.TrimSpace(s)
+		if s == "" || s == "None" {
+			return nil
+		}
+		if v, err := strconv.ParseFloat(s, 64); err == nil {
+			return &v
+		}
+	}
+	var i int
+	if err := json.Unmarshal(raw, &i); err == nil {
+		v := float64(i)
+		return &v
+	}
+	return nil
+}
+
 var langs []Lang
 var tmpl *template.Template
 
