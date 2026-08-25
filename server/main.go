@@ -26,12 +26,23 @@ var langs []Lang
 var tmpl *template.Template
 
 func main() {
-	b, err := os.ReadFile("data/snippets.json")
+	b, err := os.ReadFile("data/data.json")
 	if err != nil {
 		log.Fatal(err)
 	}
-	if err := json.Unmarshal(b, &langs); err != nil {
+	var all []Lang
+	if err := json.Unmarshal(b, &all); err != nil {
 		log.Fatal(err)
+	}
+	// game needs 6 snippets; data.json now single source (133 entries, 73 with 6 snippets)
+	langs = nil
+	for _, l := range all {
+		if len(l.Snippets) == 6 {
+			langs = append(langs, l)
+		}
+	}
+	if len(langs) == 0 {
+		langs = all
 	}
 	loadPopularity()
 	loadReleaseYears()

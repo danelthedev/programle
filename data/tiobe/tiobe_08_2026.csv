@@ -1,51 +1,51 @@
-rank, language            , rating
-   1, Python              ,  18.53
-   2, C                   ,  11.10
-   3, C++                 ,   8.62
-   4, Java                ,   8.25
-   5, C#                  ,   4.09
-   6, JavaScript          ,   2.63
-   7, Visual Basic        ,   2.18
-   8, SQL                 ,   1.88
-   9, R                   ,   1.56
-  10, Rust                ,   1.45
-  11, Delphi/Object Pascal,   1.37
-  12, Scratch             ,   1.27
-  13, PHP                 ,   1.11
-  14, Go                  ,   1.07
-  15, Fortran             ,   0.99
-  16, Ruby                ,   0.98
-  17, Swift               ,   0.96
-  18, Perl                ,   0.94
-  19, COBOL               ,   0.87
-  20, Assembly language   ,   0.86
-  21, Ada                 ,   0.81
-  22, Classic Visual Basic,   0.81
-  23, Objective-C         ,   0.78
-  24, SAS                 ,   0.76
-  25, MATLAB              ,   0.71
-  26, Julia               ,   0.70
-  27, PL/SQL              ,   0.67
-  28, Kotlin              ,   0.64
-  29, OCaml               ,   0.63
-  30, Transact-SQL        ,   0.60
-  31, LabVIEW             ,   0.56
-  32, Dart                ,   0.53
-  33, Caml                ,   0.53
-  34, Lua                 ,   0.50
-  35, GML                 ,   0.50
-  36, VHDL                ,   0.49
-  37, Prolog              ,   0.49
-  38, ABAP                ,   0.47
-  39, PowerShell          ,   0.46
-  40, Lisp                ,   0.44
-  41, Zig                 ,   0.43
-  42, VBScript            ,   0.40
-  43, D                   ,   0.38
-  44, TypeScript          ,   0.37
-  45, C shell             ,   0.34
-  46, X++                 ,   0.29
-  47, Ladder Logic        ,   0.29
-  48, Haskell             ,   0.28
-  49, Scala               ,   0.27
-  50, (Visual) FoxPro     ,   0.26
+rank,language,rating
+1,Python,18.53
+2,C,11.10
+3,C++,8.62
+4,Java,8.25
+5,C#,4.09
+6,JavaScript,2.63
+7,Visual Basic,2.18
+8,SQL,1.88
+9,R,1.56
+10,Rust,1.45
+11,Delphi/Object Pascal,1.37
+12,Scratch,1.27
+13,PHP,1.11
+14,Go,1.07
+15,Fortran,0.99
+16,Ruby,0.98
+17,Swift,0.96
+18,Perl,0.94
+19,COBOL,0.87
+20,Assembly language,0.86
+21,Ada,0.81
+22,Classic Visual Basic,0.81
+23,Objective-C,0.78
+24,SAS,0.76
+25,MATLAB,0.71
+26,Julia,0.70
+27,PL/SQL,0.67
+28,Kotlin,0.64
+29,OCaml,0.63
+30,Transact-SQL,0.60
+31,LabVIEW,0.56
+32,Dart,0.53
+33,Caml,0.53
+34,Lua,0.50
+35,GML,0.50
+36,VHDL,0.49
+37,Prolog,0.49
+38,ABAP,0.47
+39,PowerShell,0.46
+40,Lisp,0.44
+41,Zig,0.43
+42,VBScript,0.40
+43,D,0.38
+44,TypeScript,0.37
+45,C shell,0.34
+46,X++,0.29
+47,Ladder Logic,0.29
+48,Haskell,0.28
+49,Scala,0.27
+50,(Visual) FoxPro,0.26
