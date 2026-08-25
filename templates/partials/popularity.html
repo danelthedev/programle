@@ -1,0 +1,40 @@
+{{define "popularity"}}
+<div id="popularity" class="w-full max-w-2xl card bg-base-200 shadow-xl border border-base-100 hidden">
+  <div class="card-body p-4 gap-3">
+    <div class="flex justify-between items-center">
+      <h2 class="font-mono font-bold text-xl">Popularity — <span id="popLang" class="text-2xl"></span></h2>
+      <span id="popDataset" class="badge badge-primary font-mono text-xs"></span>
+    </div>
+    <p id="popDesc" class="font-mono text-xs opacity-70"></p>
+
+    <!-- ORDER PHASE -->
+    <div id="popOrderSection" class="grid gap-3">
+      <div id="popLine" class="grid grid-cols-5 gap-2 min-h-12">
+        <!-- 5 slots injected -->
+      </div>
+      <div id="popOrderRanks" class="grid grid-cols-5 gap-2 font-mono text-sm font-bold text-center hidden"></div>
+      <div id="popPool" class="flex flex-wrap gap-2"></div>
+      <button id="popOrderSubmit" class="btn btn-primary btn-sm font-mono">Submit Order</button>
+      <div id="popOrderResult" class="font-mono text-xs hidden"></div>
+    </div>
+
+    <!-- RANK PHASE -->
+    <div id="popRankSection" class="grid gap-3 hidden">
+      <div class="flex gap-2 items-center">
+        <input id="popRankInput" type="number" min="1" max="275" placeholder="1" class="input input-bordered input-sm w-24 font-mono">
+        <input id="popRankSlider" type="range" min="1" max="50" value="25" class="range range-primary range-sm flex-1">
+        <span id="popRankVal" class="font-mono text-sm w-8 text-center">25</span>
+      </div>
+      <p class="font-mono text-xs opacity-60">Within 5% is considered correct</p>
+      <button id="popRankSubmit" class="btn btn-primary btn-sm font-mono">Submit Rank</button>
+      <div id="popRankResult" class="font-mono text-xs hidden"></div>
+    </div>
+
+    <div class="flex gap-2">
+      <button id="popNextDataset" class="btn btn-primary font-mono hidden">Next Dataset →</button>
+      <button id="popClose" class="btn btn-ghost btn-sm font-mono hidden">Close</button>
+    </div>
+  </div>
+</div>
+<button id="popularityBtn" class="btn btn-secondary w-full max-w-2xl font-mono hidden">Next: Guess Popularity →</button>
+{{end}}
