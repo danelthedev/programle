@@ -2,3 +2,5 @@ tmp/
 node_modules/
 static/css/
 server.log
+
+data/wikidata_years.json

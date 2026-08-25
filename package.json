@@ -6,7 +6,7 @@
     "dev": "npm run tailwind",
     "build:css": "tailwindcss -i ./src/input.css -o ./static/css/app.css --minify",
     "tailwind": "npm run build:css -- --watch",
-    "serve": "go run .",
+    "serve": "go run ./server",
     "air": "air"
   },
   "devDependencies": {

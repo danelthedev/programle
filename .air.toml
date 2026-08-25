@@ -2,10 +2,11 @@ root = "."
 tmp_dir = "tmp"
 
 [build]
-cmd = "go build -o ./tmp/main ."
+cmd = "go build -buildvcs=false -o ./tmp/main ./server"
 bin = "./tmp/main"
-exclude_dir = ["static", "tmp", "node_modules"]
+exclude_dir = ["static", "tmp", "node_modules", "templates"]
 include_ext = ["go", "html", "json"]
+include_file = ["templates/index.html"]
 
 [log]
 main_only = false
