@@ -28,6 +28,18 @@ let popDatasets = [];
 let popIdx = 0;
 let popPool = [];
 let popSelection = [];
+const releaseEl = document.getElementById('release');
+const releaseBtn = document.getElementById('releaseBtn');
+const releaseTimeline = document.getElementById('releaseTimeline');
+const releaseChoiceA = document.getElementById('releaseChoiceA');
+const releaseChoiceB = document.getElementById('releaseChoiceB');
+const releaseResult = document.getElementById('releaseResult');
+const releaseNext = document.getElementById('releaseNext');
+const releaseDone = document.getElementById('releaseDone');
+const releaseProgress = document.getElementById('releaseProgress');
+let releaseOpponents = [];
+let releaseIdx = 0;
+let releaseDotPositions = [];
 document.body.addEventListener('htmx:afterSwap', e=>{ if(e.detail.target && e.detail.target.id==='options') e.detail.target.classList.remove('hidden'); });
 function dailyIndex(){ return Math.floor(Date.now()/86400000) % LANGS.length; }
 function pickTarget(){
@@ -82,6 +94,8 @@ function resetGame(){
   restartBtn.classList.add('hidden'); setMessage('');
   if(popularityBtn) popularityBtn.classList.add('hidden');
   if(popularityEl) popularityEl.classList.add('hidden');
+  if(releaseBtn) releaseBtn.classList.add('hidden');
+  if(releaseEl) releaseEl.classList.add('hidden');
   document.getElementById('mainGame')?.classList.remove('hidden');
   popDatasets=[]; popIdx=0; popPool=[]; popSelection=[];
   renderSnippet(); renderGuesses();
@@ -103,18 +117,28 @@ function submitGuess(){
   if(correct){
     setMessage('Correct! '+target.name+' — '+(guesses.length)+'/6','text-success');
     inputEl.disabled=true; document.getElementById('submitBtn').disabled=true;
-    if((target.tiobe_rank!=null || target.github_rank!=null) && popularityBtn){
+    if(target.release_year!=null && LANGS.some(l=> l.release_year!=null && l.name!==target.name) && releaseBtn){
+      releaseBtn.classList.remove('hidden');
+      restartBtn.classList.add('hidden');
+      if(popularityBtn) popularityBtn.classList.add('hidden');
+    } else if((target.tiobe_rank!=null || target.github_rank!=null) && popularityBtn){
       popularityBtn.classList.remove('hidden');
       restartBtn.classList.add('hidden');
+      if(releaseBtn) releaseBtn.classList.add('hidden');
     } else {
       restartBtn.classList.remove('hidden');
     }
   } else if(guesses.length>=6){
     setMessage('Out of guesses! It was '+target.name,'text-error');
     inputEl.disabled=true; document.getElementById('submitBtn').disabled=true;
-    if((target.tiobe_rank!=null || target.github_rank!=null) && popularityBtn){
+    if(target.release_year!=null && LANGS.some(l=> l.release_year!=null && l.name!==target.name) && releaseBtn){
+      releaseBtn.classList.remove('hidden');
+      restartBtn.classList.add('hidden');
+      if(popularityBtn) popularityBtn.classList.add('hidden');
+    } else if((target.tiobe_rank!=null || target.github_rank!=null) && popularityBtn){
       popularityBtn.classList.remove('hidden');
       restartBtn.classList.add('hidden');
+      if(releaseBtn) releaseBtn.classList.add('hidden');
     } else {
       restartBtn.classList.remove('hidden');
     }
@@ -146,9 +170,14 @@ toggleEl.addEventListener('click', ()=>{
           inputEl.disabled=true;
           document.getElementById('submitBtn').disabled=true;
           setMessage(guesses.some(g=>g.correct)?'Already solved!':'Out of guesses! It was '+target.name, guesses.some(g=>g.correct)?'text-success':'text-error');
-          if((target.tiobe_rank!=null || target.github_rank!=null) && popularityBtn){
+          if(target.release_year!=null && LANGS.some(l=> l.release_year!=null && l.name!==target.name) && releaseBtn){
+            releaseBtn.classList.remove('hidden');
+            restartBtn.classList.add('hidden');
+            if(popularityBtn) popularityBtn.classList.add('hidden');
+          } else if((target.tiobe_rank!=null || target.github_rank!=null) && popularityBtn){
             popularityBtn.classList.remove('hidden');
             restartBtn.classList.add('hidden');
+            if(releaseBtn) releaseBtn.classList.add('hidden');
           } else {
             restartBtn.classList.remove('hidden');
           }
@@ -292,10 +321,141 @@ function submitPopRank(){
   const nextBtn=document.getElementById('popNextDataset'); const closeBtn=document.getElementById('popClose');
   if(popIdx < popDatasets.length-1){ if(nextBtn) nextBtn.classList.remove('hidden'); } else { if(closeBtn) closeBtn.classList.remove('hidden'); }
 }
+function startReleaseDuel(){
+  const hasYear = target && target.release_year!=null;
+  if(!hasYear){ // skip to popularity
+    if((target.tiobe_rank!=null || target.github_rank!=null) && popularityBtn){ popularityBtn.classList.remove('hidden'); } else { restartBtn.classList.remove('hidden'); }
+    return;
+  }
+  let cands=LANGS.filter(l=> l.release_year!=null && l.name!==target.name);
+  shuffle(cands);
+  releaseOpponents=cands.slice(0,5);
+  if(releaseOpponents.length<5){ // fallback if not enough
+    releaseOpponents=cands.slice(0, Math.min(5,cands.length));
+  }
+  releaseIdx=0;
+  if(releaseTimeline) releaseTimeline.innerHTML='';
+  releaseDotPositions=[];
+  const minEl=document.getElementById('releaseMinYear'); if(minEl) minEl.textContent='1957';
+  const maxEl=document.getElementById('releaseMaxYear'); if(maxEl) maxEl.textContent='2025';
+  document.getElementById('mainGame')?.classList.add('hidden');
+  if(popularityBtn) popularityBtn.classList.add('hidden');
+  if(releaseBtn) releaseBtn.classList.add('hidden');
+  if(releaseEl){ releaseEl.classList.remove('hidden'); releaseEl.scrollIntoView({behavior:'smooth'}); }
+  renderReleaseFight();
+}
+function renderReleaseFight(){
+  if(releaseIdx>=releaseOpponents.length){
+    document.getElementById('releaseFight')?.classList.add('hidden');
+    document.getElementById('releaseDone')?.classList.remove('hidden');
+    return;
+  }
+  const opp=releaseOpponents[releaseIdx];
+  if(releaseProgress) releaseProgress.textContent=(releaseIdx+1)+'/5';
+  const langEl=document.getElementById('releaseLang'); if(langEl) langEl.textContent=target.name;
+  const choices=shuffle([[target.name, target.release_year],[opp.name, opp.release_year]]);
+  if(releaseChoiceA){ releaseChoiceA.textContent=choices[0][0]; releaseChoiceA.dataset.name=choices[0][0]; releaseChoiceA.dataset.year=choices[0][1]; releaseChoiceA.disabled=false; releaseChoiceA.className='btn btn-primary font-mono text-base flex-1 truncate'; }
+  if(releaseChoiceB){ releaseChoiceB.textContent=choices[1][0]; releaseChoiceB.dataset.name=choices[1][0]; releaseChoiceB.dataset.year=choices[1][1]; releaseChoiceB.disabled=false; releaseChoiceB.className='btn btn-secondary font-mono text-base flex-1 truncate'; }
+  if(releaseResult){ releaseResult.classList.add('hidden'); releaseResult.textContent=''; }
+  if(releaseNext) releaseNext.classList.add('hidden');
+  document.getElementById('releaseFight')?.classList.remove('hidden');
+  document.getElementById('releaseDone')?.classList.add('hidden');
+}
+function handleReleaseChoice(chosenName){
+  const opp=releaseOpponents[releaseIdx];
+  const targetYear=target.release_year, oppYear=opp.release_year;
+  const correctOlder= targetYear < oppYear ? target.name : opp.name;
+  const isCorrect= chosenName===correctOlder;
+  [releaseChoiceA, releaseChoiceB].forEach(btn=>{
+    if(!btn) return;
+    if(btn.dataset.name===correctOlder){ btn.className='btn btn-success font-mono text-base flex-1 truncate'; }
+    else { btn.className='btn btn-error font-mono text-base flex-1 truncate'; }
+    btn.disabled=true;
+  });
+  if(releaseResult){
+    releaseResult.textContent= isCorrect? 'Correct! '+correctOlder+' ('+Math.min(targetYear,oppYear)+') is older' : 'Wrong! '+correctOlder+' ('+Math.min(targetYear,oppYear)+') is older';
+    releaseResult.className='font-mono text-sm text-center '+(isCorrect?'text-success':'text-error');
+    releaseResult.classList.remove('hidden');
+  }
+  placeReleaseDot(opp, isCorrect);
+  setTimeout(()=>{ releaseIdx++; renderReleaseFight(); }, 900);
+}
+function placeReleaseDot(lang, isCorrect){
+  if(!releaseTimeline) return;
+  const year=lang.release_year;
+  let existing = releaseDotPositions.find(p=> p.year===year);
+  if(existing){
+    existing.names.push({name: lang.name, isCorrect});
+    const nameContainer=existing.el.querySelector('.dot-names');
+    if(nameContainer){
+      const n=document.createElement('div');
+      n.className='font-mono text-[10px] leading-none whitespace-nowrap bg-base-200 px-1 rounded '+(isCorrect?'text-success':'text-error');
+      n.textContent=lang.name;
+      nameContainer.appendChild(n);
+    }
+    return;
+  }
+  const minY=1957, maxY=2025;
+  let pct=Math.max(8,Math.min(92, ((year-minY)/(maxY-minY))*100));
+  let lvl=0;
+  const nearby=releaseDotPositions.filter(p=> Math.abs(p.year - year) < 4);
+  if(nearby.length){
+    const used=new Set(nearby.map(p=>p.lvl));
+    for(let i=1;i<10;i++){
+      const cand=i%2===1 ? Math.ceil(i/2) : -Math.ceil(i/2);
+      if(!used.has(cand)){ lvl=cand; break; }
+    }
+  }
+  const dot=document.createElement('div');
+  dot.className='absolute flex flex-col items-center -translate-x-1/2';
+  dot.style.left=pct+'%';
+  dot.style.top='50%';
+  dot.style.transform='translate(-50%, -50%)';
+  const color=isCorrect?'bg-success':'bg-error';
+  const nameOff = -14 - Math.abs(lvl)*16;
+  const yearOff = 10 + Math.abs(lvl)*16;
+  dot.innerHTML=`<div class="dot-names flex flex-col items-center gap-0.5" style="transform: translateY(${nameOff}px)"><div class="font-mono text-[10px] leading-none whitespace-nowrap bg-base-200 px-1 rounded ${isCorrect?'text-success':'text-error'}">${lang.name}</div></div><div class="w-px h-3 bg-white"></div><div class="w-3 h-3 rounded-full ${color} border-2 border-base-100"></div><div class="w-px h-3 bg-white"></div><div class="font-mono text-[10px] leading-none whitespace-nowrap bg-base-200 px-1 rounded border border-base-300" style="transform: translateY(${yearOff}px)">${year}</div>`;
+  releaseDotPositions.push({year, pct, lvl, el: dot, names:[{name: lang.name, isCorrect}]});
+  releaseTimeline.appendChild(dot);
+  updateReleaseTimelineZoom();
+}
+function updateReleaseTimelineZoom(){
+  if(releaseDotPositions.length<2) return;
+  const years=releaseDotPositions.map(p=>p.year);
+  let minY=Math.min(...years), maxY=Math.max(...years);
+  const gap=maxY-minY;
+  const pad=Math.max(2, Math.ceil(gap*0.2));
+  minY-=pad; maxY+=pad;
+  minY=Math.max(1957, minY); maxY=Math.min(2025, maxY);
+  if(minY===maxY) return;
+  // update labels
+  const minEl=document.getElementById('releaseMinYear'); if(minEl) minEl.textContent=minY;
+  const maxEl=document.getElementById('releaseMaxYear'); if(maxEl) maxEl.textContent=maxY;
+  // reposition dots
+  releaseDotPositions.forEach(p=>{
+    const pct=Math.max(8,Math.min(92, ((p.year- minY)/(maxY-minY))*100));
+    p.pct=pct;
+    if(p.el) p.el.style.left=pct+'%';
+  });
+}
 if(popularityBtn) popularityBtn.addEventListener('click', startPopularity);
 document.getElementById('popOrderSubmit')?.addEventListener('click', submitPopOrder);
 document.getElementById('popRankSubmit')?.addEventListener('click', submitPopRank);
 document.getElementById('popNextDataset')?.addEventListener('click', ()=>{ popIdx++; startPopDataset(); });
 document.getElementById('popClose')?.addEventListener('click', ()=>{ if(popularityEl) popularityEl.classList.add('hidden'); document.getElementById('mainGame')?.classList.remove('hidden'); restartBtn.classList.remove('hidden'); });
+if(releaseBtn) releaseBtn.addEventListener('click', startReleaseDuel);
+releaseChoiceA?.addEventListener('click', ()=> handleReleaseChoice(releaseChoiceA.dataset.name));
+releaseChoiceB?.addEventListener('click', ()=> handleReleaseChoice(releaseChoiceB.dataset.name));
+releaseNext?.addEventListener('click', ()=>{ releaseIdx++; renderReleaseFight(); });
+document.getElementById('releaseToPopularity')?.addEventListener('click', ()=>{
+  if(releaseEl) releaseEl.classList.add('hidden');
+  const hasPop = target && (target.tiobe_rank!=null || target.github_rank!=null);
+  if(hasPop){ startPopularity(); } else { document.getElementById('mainGame')?.classList.remove('hidden'); restartBtn.classList.remove('hidden'); }
+});
+document.getElementById('releaseClose')?.addEventListener('click', ()=>{
+  if(releaseEl) releaseEl.classList.add('hidden');
+  document.getElementById('mainGame')?.classList.remove('hidden');
+  restartBtn.classList.remove('hidden');
+});
 popRankSlider?.addEventListener('input', e=>{ if(popRankVal) popRankVal.textContent=e.target.value; if(popRankInput) popRankInput.value=e.target.value; });
 popRankInput?.addEventListener('input', e=>{ if(popRankSlider) popRankSlider.value=e.target.value; if(popRankVal) popRankVal.textContent=e.target.value; });

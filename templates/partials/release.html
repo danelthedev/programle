@@ -1,0 +1,34 @@
+{{define "release"}}
+<div id="release" class="w-full max-w-2xl card bg-base-200 shadow-xl border border-base-100 hidden">
+  <div class="card-body p-4 gap-3">
+    <div class="flex justify-between items-center">
+      <p class="font-mono text-sm">Which language is older?</p>
+      <span id="releaseProgress" class="badge badge-ghost font-mono text-xs">1/5</span>
+    </div>
+    <div class="relative h-20 mt-2">
+      <div class="absolute top-1/2 left-0 right-0 h-0.5 bg-white -translate-y-1/2"></div>
+      <div id="releaseTimeline" class="absolute inset-0">
+        <!-- dots injected -->
+      </div>
+    </div>
+    <div class="flex justify-between font-mono text-xs opacity-60 -mt-2">
+      <span id="releaseMinYear">1957</span><span id="releaseMaxYear">2025</span>
+    </div>
+    <div id="releaseFight" class="grid gap-3">
+      <div class="flex gap-2 justify-center">
+        <button id="releaseChoiceA" class="btn btn-primary font-mono text-base flex-1 truncate"></button>
+        <span class="self-center font-mono">vs</span>
+        <button id="releaseChoiceB" class="btn btn-secondary font-mono text-base flex-1 truncate"></button>
+      </div>
+      <div id="releaseResult" class="font-mono text-sm text-center hidden"></div>
+      <button id="releaseNext" class="btn btn-primary btn-sm font-mono hidden">Next Duel →</button>
+    </div>
+    <div id="releaseDone" class="hidden grid gap-2">
+      <p class="font-mono text-sm text-center">Release duels done!</p>
+      <button id="releaseToPopularity" class="btn btn-secondary font-mono">Next: Popularity →</button>
+      <button id="releaseClose" class="btn btn-ghost btn-sm font-mono">Close</button>
+    </div>
+  </div>
+</div>
+<button id="releaseBtn" class="btn btn-secondary w-full max-w-2xl font-mono hidden">Next: Release Year Duel →</button>
+{{end}}

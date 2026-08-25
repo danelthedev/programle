@@ -19,6 +19,7 @@ type Lang struct {
 	TiobeRating *float64 `json:"tiobe_rating,omitempty"`
 	GithubRank  *int     `json:"github_rank,omitempty"`
 	GithubShare *float64 `json:"github_share,omitempty"`
+	ReleaseYear *int     `json:"release_year,omitempty"`
 }
 
 var langs []Lang
@@ -33,13 +34,15 @@ func main() {
 		log.Fatal(err)
 	}
 	loadPopularity()
+	loadReleaseYears()
 	{
-		cT, cG := 0, 0
+		cT, cG, cR := 0, 0, 0
 		for _, l := range langs {
 			if l.TiobeRank != nil { cT++ }
 			if l.GithubRank != nil { cG++ }
+			if l.ReleaseYear != nil { cR++ }
 		}
-		log.Printf("popularity: tiobe %d github %d", cT, cG)
+		log.Printf("popularity: tiobe %d github %d release %d", cT, cG, cR)
 	}
 	tmpl = template.Must(template.ParseGlob("templates/*.html"))
 	tmpl = template.Must(tmpl.ParseGlob("templates/partials/*.html"))
@@ -141,6 +144,27 @@ func loadPopularity() {
 	}
 }
 
+func loadReleaseYears() {
+	b, err := os.ReadFile("data/data.json")
+	if err != nil { log.Println("release_year load:", err); return }
+	var arr []struct {
+		Name        string `json:"name"`
+		ReleaseYear *int   `json:"release_year"`
+	}
+	if err := json.Unmarshal(b, &arr); err != nil { log.Println("release_year parse:", err); return }
+	m := map[string]int{}
+	for _, e := range arr {
+		if e.ReleaseYear != nil {
+			m[norm(e.Name)] = *e.ReleaseYear
+		}
+	}
+	for i := range langs {
+		if v, ok := m[norm(langs[i].Name)]; ok {
+			v2 := v
+			langs[i].ReleaseYear = &v2
+		}
+	}
+}
 func searchHandler(w http.ResponseWriter, r *http.Request) {
 	q := strings.ToLower(strings.TrimSpace(r.URL.Query().Get("q")))
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
