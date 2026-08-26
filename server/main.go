@@ -145,8 +145,12 @@ func main() {
 	http.HandleFunc("/search", searchHandler)
 	http.HandleFunc("/", homeHandler)
 
-	log.Println("http://localhost:8080")
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	log.Println("http://localhost:" + port)
+	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
 
 func norm(s string) string { return strings.ToLower(strings.TrimSpace(s)) }
